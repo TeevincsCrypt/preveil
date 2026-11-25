@@ -14,6 +14,9 @@ import { ProposalPage } from '@/pages/ProposalPage';
 import { SubmitProposal } from '@/pages/SubmitProposal';
 import { Privacy } from '@/pages/Privacy';
 import { Network } from '@/pages/Network';
+import { LiveHome } from '@/pages/LiveHome';
+import { LiveRound } from '@/pages/LiveRound';
+import { LiveProvider } from '@/live/LiveContext';
 import { Logo } from '@/components/Layout';
 
 function Gate({ children }: { children: React.ReactNode }) {
@@ -40,12 +43,15 @@ setTimeout(() => {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <WalletProvider>
+      <LiveProvider>
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Landing />} />
             <Route path="privacy" element={<Privacy />} />
             <Route path="network" element={<Network />} />
+            <Route path="live" element={<LiveHome />} />
+            <Route path="live/:address" element={<LiveRound />} />
             <Route path="rounds" element={<Gate><Rounds /></Gate>} />
             <Route path="rounds/new" element={<Gate><CreateRound /></Gate>} />
             <Route path="rounds/:id" element={<Gate><RoundPage /></Gate>} />
@@ -55,6 +61,7 @@ createRoot(document.getElementById('root')!).render(
           </Route>
         </Routes>
       </HashRouter>
+      </LiveProvider>
     </WalletProvider>
   </StrictMode>,
 );

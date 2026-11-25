@@ -39,16 +39,18 @@ Each grant round is one deployment of the PRIVEIL Compact contract:
   with a side-by-side private/public view and live privacy scan, sealed results, verified
   allocation, public-ledger explorer. In **Local Simulation** (clearly labelled), the compiled
   contract executes in the browser.
-- Lace wallet connection through the official DApp Connector API, plus an experimental network
-  mode built on midnight-js 5.0.1.
+- **Live mode:** deploy and run real rounds on a Midnight test network through Lace (DApp Connector
+  API, midnight-js 5.0.1). The wallet makes the ZK proofs; share links carry documents that are
+  verified against on-chain hashes. The full transaction lifecycle is tested offline through
+  midnight-js's transaction builders.
 - `SPEC.md` with the threat model and accepted leaks. CI compiles, tests, builds and runs a
   Playwright end-to-end flow.
 
 ## Honest limitations
 
 Opened choices are public under anonymous nullifiers after voting closes. Unrevealed ballots aren't
-counted. The admin is trusted for the roster. Live-network deployment is wired but not yet
-verified. Proofs are not generated in Local Simulation.
+counted. The admin is trusted for the roster. Wallet proving and submission on a live network
+still need a run with a funded Lace wallet. Proofs are not generated in Local Simulation.
 
 ## Links
 

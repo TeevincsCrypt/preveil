@@ -6,13 +6,10 @@
 // network configuration, balances and submits transactions; proofs are made
 // by the wallet or by a local proof server.
 //
-// STATUS: experimental in this MVP. It type-checks against midnight-js 5.0.1
-// but has not been exercised against a live network from this repository
-// (see README → Known limitations). The Local Simulation runs the same
-// compiled contract and is what the demo uses.
-//
-// Requirements: the compiled proving keys must be served at /managed/priveil
-// (run `npm run compile` at the repo root, then `npm run copy:zk -w ui`).
+// Used by the Live mode (ui/src/pages/Live*.tsx). Requirements: a Midnight
+// wallet (Lace) on a test network with DUST for fees, and the compiled proving
+// keys served at /managed/priveil (committed under contract/managed/priveil/keys
+// and copied by `npm run copy:zk`, which the dev and build scripts run).
 
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import { deployContract, submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
@@ -103,21 +100,48 @@ export async function createProviders(api: ConnectedAPI, mode: ProvingMode, proo
 }
 
 /** Deploys one grant round. The deployer's private state makes them the admin. */
-export async function deployRound(p: PriveilProviders, cfg: RoundConfig, adminSk: Uint8Array): Promise<{ address: ContractAddress; txId: string }> {
+export type TxResult<R = unknown> = { txId: string; blockHeight?: number; result?: R };
+
+export async function deployRound(p: PriveilProviders, cfg: RoundConfig, adminSk: Uint8Array): Promise<{ address: ContractAddress; txId: string; blockHeight?: number }> {
   const deployed = await deployContract(p, {
     compiledContract: CompiledPriveil,
     privateStateId: PRIVATE_STATE_ID,
     initialPrivateState: { secretKey: adminSk },
     args: [cfg.roundId, cfg.fundingPool, cfg.submissionEnd, cfg.votingStart, cfg.votingEnd, cfg.revealEnd, cfg.quorum],
   } as never);
-  const pub = (deployed as { deployTxData: { public: { contractAddress: ContractAddress; txId: string } } }).deployTxData.public;
-  return { address: pub.contractAddress, txId: pub.txId };
+  const pub = (deployed as { deployTxData: { public: { contractAddress: ContractAddress; txId: string; blockHeight?: number } } }).deployTxData.public;
+  return { address: pub.contractAddress, txId: pub.txId, blockHeight: pub.blockHeight };
 }
 
 /** Proves and submits one circuit call as `who` (whose private state is set first). */
-export async function callCircuit(p: PriveilProviders, address: ContractAddress, who: PriveilPrivateState, circuitId: PriveilCircuit, args: unknown[]) {
+export async function callCircuit<R = unknown>(
+  p: PriveilProviders,
+  address: ContractAddress,
+  who: PriveilPrivateState,
+  circuitId: PriveilCircuit,
+  args: unknown[],
+): Promise<TxResult<R>> {
   await p.privateStateProvider.forContract(address).set(PRIVATE_STATE_ID, who);
-  return submitCallTx(p, { compiledContract: CompiledPriveil, contractAddress: address, privateStateId: PRIVATE_STATE_ID, circuitId, args } as never);
+  const tx = (await submitCallTx(p, { compiledContract: CompiledPriveil, contractAddress: address, privateStateId: PRIVATE_STATE_ID, circuitId, args } as never)) as unknown as {
+    public: { txId: string; blockHeight?: number };
+    private?: { result?: R };
+  };
+  return { txId: tx.public.txId, blockHeight: tx.public.blockHeight, result: tx.private?.result };
+}
+
+/** Subscribes to the round's public ledger through the indexer. Returns an unsubscribe function. */
+export function observeLedger(p: PriveilProviders, address: ContractAddress, onLedger: (l: Ledger, blockHeight: number) => void, onError: (e: unknown) => void): () => void {
+  const sub = p.publicDataProvider.contractStateObservable(address, { type: 'latest' }).subscribe({
+    next: (rec) => {
+      try {
+        onLedger(ledger(contractStateData(rec.value as unknown as ContractStateRead)), rec.blockHeight);
+      } catch (e) {
+        onError(e);
+      }
+    },
+    error: onError,
+  });
+  return () => sub.unsubscribe();
 }
 
 /** Reads and decodes the round's public ledger from the indexer. */

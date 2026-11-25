@@ -14,7 +14,7 @@ publicly exposing how each member voted**, while the final allocation stays **pu
 |---|---|
 | Smart contract | [`contract/priveil.compact`](contract/priveil.compact): Compact 0.28, compiles with `compactc` 0.36.1, including ZK proving keys for all 5 circuits |
 | Contract spec | [`SPEC.md`](SPEC.md): public fields, private state, every assert, privacy invariants, accepted leaks |
-| Tests | 44 tests that run the compiled contract (every guard, allocation vs. an independent model, privacy invariants), plus a Playwright end-to-end flow |
+| Tests | 46 tests: 44 on the compiled contract (every guard, allocation vs. an independent model, privacy invariants) and 2 that run a full round through midnight-js's transaction builders; plus Playwright end-to-end checks |
 | App | React + Vite in [`ui/`](ui). Runs the compiled contract in the browser; Lace wallet connection |
 | Pitch & demo | [`docs/PITCH_DECK.md`](docs/PITCH_DECK.md), [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) (2-minute video script), [`docs/SUBMISSION.md`](docs/SUBMISSION.md) |
 
@@ -101,7 +101,7 @@ flowchart LR
     CI -- "ZK proof + disclosed values only" --> L
     UI["Web app (ui/)"] --> CI
     UI -. "Local Simulation:<br/>compact-runtime in browser" .-> CI
-    UI -. "Network mode (experimental):<br/>Lace + midnight-js" .-> L
+    UI -. "Live mode:<br/>Lace + midnight-js" .-> L
 ```
 
 ### What is public and what is private
@@ -175,7 +175,7 @@ contract/
   crypto.ts                key/nullifier/commitment helpers, which call the contract's pure circuits
   simulator.ts             runs the compiled contract on compact-runtime (tests and Local Simulation)
   privacy.ts               public-state privacy scanner (used by tests and the UI)
-  managed/priveil/         compiler output (generated JS committed; proving keys are git-ignored)
+  managed/priveil/         compiler output (generated JS, zkir and proving keys, all committed)
 src/test/
   priveil.test.ts          functional tests: every guard, results, allocation model
   privacy.test.ts          privacy invariants asserted over the decoded public ledger
@@ -184,7 +184,9 @@ ui/
   src/engine/              demo store and deterministic seed (fictional demo data)
   src/pages/               landing, rounds, round (proposals/vote/results/ledger), create, submit, privacy, modes
   src/wallet/              Midnight DApp Connector (Lace) connection
-  src/midnight/network.ts  experimental on-chain mode (midnight-js providers)
+  src/midnight/network.ts  Live mode: midnight-js providers, deploy, calls, ledger subscription
+  src/live/                Live mode state: wallet providers, per-round vault, share links
+  src/pages/Live*.tsx      Live mode pages
   e2e/demo-flow.cjs        Playwright end-to-end flow
 SPEC.md                    contract specification
 docs/                      pitch deck, demo script, submission text
@@ -245,7 +247,7 @@ Output goes to `contract/managed/priveil/` (`contract/` generated JS, `zkir/`, `
 ### Test
 
 ```bash
-npm test               # 44 contract tests on the compiled contract
+npm test               # 44 contract tests + 2 midnight-js transaction-builder tests
 npm run typecheck
 # End-to-end UI flow (needs a running preview on :4173 and Playwright with Chromium):
 npm run build && npm run preview &
@@ -282,27 +284,57 @@ and projects are **fictional demo data**.
    verification checks. **Public ledger** shows exactly what an indexer sees.
 8. **Create round** deploys your own round instance. The constructor rejects invalid timelines.
 
-### Wallet and network mode
+### Live mode: real transactions on Midnight
 
-**Modes & wallet** detects Midnight wallets injected into `window.midnight` (Lace) and connects
-through the official DApp Connector API (`@midnight-ntwrk/dapp-connector-api` 4.0.1). It shows the
-real network id and shielded address. The connection is real when a wallet is installed. Nothing is
-shown as connected unless `connect()` succeeded.
+**Live on Midnight** (`/#/live`) runs the same contract on a Midnight test network. Every action is
+a real transaction with a real zero-knowledge proof made by your wallet.
 
-Deploying a round to a network (`ui/src/midnight/network.ts`) uses the provider wiring from
-Midnight's official UI template (midnight-js 5.0.1). It needs Lace on preprod or preview with tDUST,
-plus the proving keys (`npm run compile`; they are copied to `ui/public/managed/priveil` by the dev
-and build scripts). **This path type-checks but was not exercised against a live network from this
-repository.** See Known limitations.
+You need:
+- The **Lace** wallet extension with Midnight enabled, set to `preprod` or `preview`.
+- Test tokens on that network: tNIGHT from the network's faucet, with DUST generation set up in Lace
+  (DUST pays the fees).
+
+Run a round:
+1. Open **Live on Midnight**, pick the network your wallet is on, and click **Connect wallet**.
+2. **Deploy a new round.** Deadlines are real time, so use short windows for a demo (for example
+   20 min of proposals, 20 min of voting, 15 min of reveal). You become the admin. Your admin secret
+   is generated and kept in this browser.
+3. **Submit proposals** and **enrol voters** while proposals are open. Each voter clicks
+   **Generate credential** and sends you their voter key, a hash of their secret. You paste it under
+   **Enrol key**, or use **Enrol myself**. Enrolment closes when voting opens.
+4. **Copy share link** gives other people the round. The link carries the proposal documents;
+   their browser checks every document against its on-chain hash before showing it.
+5. When voting opens, each voter casts a hidden ballot. After it closes, each voter reveals. Anyone
+   can **Finalize**, and the contract computes the allocation.
+
+How it works: the wallet is connected through the official DApp Connector API
+(`@midnight-ntwrk/dapp-connector-api` 4.0.1), and the providers follow Midnight's official UI
+template (midnight-js 5.0.1). The indexer URL comes from the wallet's configuration. The wallet
+proves using the keys this site serves from `/managed/priveil` (committed under
+`contract/managed/priveil/keys`), then balances, signs and submits.
+**Proofs by → local proof server** uses a proof server on `127.0.0.1:6300` instead.
+
+Your per-round secrets (admin, builder and voter keys, and your ballot choice, which you need to
+reveal) are stored in this browser's `localStorage`, **unencrypted**. Clearing site data before you
+reveal means your ballot can't be counted.
+
+**Verified so far:** `src/test/sdk.test.ts` runs a full round offline through midnight-js 5.0.1's
+transaction builders: deploy, enrol, submit, cast (duplicate rejected), reveal, finalize. It uses
+the compiled contract, the browser's witnesses and the committed key bundle. `ui/e2e/live-providers.cjs`
+checks that the provider stack builds in the browser bundle. **Not yet verified from this
+repository:** wallet proving and submission on a live network. That needs a real Lace wallet with
+test funds.
 
 ---
 
 ## Known limitations
 
-- **No live-network deployment has been verified yet.** Development ran in a sandbox without a
-  Docker daemon (so no local devnet or proof server) and without access to Midnight testnet
-  endpoints. The contract compiles with ZK keys and is tested on compact-runtime; the network
-  mode is wired but unverified.
+- **Live mode's last mile is unverified from this repository.** Building every transaction through
+  midnight-js is tested offline, but wallet proving and submission on preprod/preview need a real
+  Lace wallet with test funds. Development ran in a sandbox without a wallet, a Docker daemon or
+  testnet access.
+- Live mode keeps secrets in unencrypted `localStorage`, and proposal documents travel in share
+  links, not on decentralized storage.
 - Local Simulation does not generate proofs. It enforces the contract's logic but not proof
   soundness.
 - MVP limits: 8 proposals per round, 1024 voters per round, one vote per member (no weighting or

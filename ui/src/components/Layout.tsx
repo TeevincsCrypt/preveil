@@ -25,6 +25,20 @@ export function Wordmark({ className }: { className?: string }) {
 }
 
 function ModeBanner() {
+  const live = useLocation().pathname.startsWith('/live');
+  if (live)
+    return (
+      <div className="bg-ink text-[12px] text-ink-fg/70">
+        <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-4 py-1.5 sm:px-8">
+          <span className="pulse-dot size-1.5 shrink-0 rounded-full bg-[#7fd6a2]" />
+          <span className="shrink-0 font-medium whitespace-nowrap text-ink-fg">Live mode</span>
+          <span className="hidden truncate sm:inline">— real transactions on a Midnight test network, with zero-knowledge proofs made by your wallet.</span>
+          <Link to="/rounds" className="ml-auto shrink-0 text-ink-fg underline decoration-ink-fg/30 underline-offset-4 hover:decoration-ink-fg">
+            Back to the demo
+          </Link>
+        </div>
+      </div>
+    );
   return (
     <div className="bg-ink text-[12px] text-ink-fg/70">
       <div className="mx-auto flex max-w-[1400px] items-center gap-2 px-4 py-1.5 sm:px-8">
@@ -53,6 +67,7 @@ const links = [
   { to: '/rounds', label: 'Grant rounds' },
   { to: '/privacy', label: 'How privacy works' },
   { to: '/rounds/new', label: 'Create round' },
+  { to: '/live', label: 'Live on Midnight' },
 ];
 
 function Toasts() {
@@ -154,6 +169,7 @@ function Footer() {
             <Link to="/rounds" className="hover:text-ink-fg">Grant rounds</Link>
             <Link to="/rounds/new" className="hover:text-ink-fg">Create a round</Link>
             <Link to="/privacy" className="hover:text-ink-fg">How privacy works</Link>
+            <Link to="/live" className="hover:text-ink-fg">Live on Midnight</Link>
             <Link to="/network" className="hover:text-ink-fg">Modes & wallet</Link>
           </div>
         </div>

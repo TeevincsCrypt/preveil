@@ -46,3 +46,4 @@ jobs:
           (cd ui && npx vite preview --port 4173 --strictPort &) 
           npx wait-on -t 60000 http://localhost:4173 || sleep 5
           node ui/e2e/demo-flow.cjs http://localhost:4173
+          node ui/e2e/live-providers.cjs http://localhost:4173

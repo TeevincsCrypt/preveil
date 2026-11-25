@@ -19,7 +19,7 @@
     "test:sim": "vitest run",
     "dev": "npm run dev -w ui",
     "build": "npm run build -w ui",
-    "e2e": "node ui/e2e/demo-flow.cjs",
+    "e2e": "node ui/e2e/demo-flow.cjs && node ui/e2e/live-providers.cjs",
     "preview": "npm run preview -w ui -- --port 4173"
   },
   "dependencies": {

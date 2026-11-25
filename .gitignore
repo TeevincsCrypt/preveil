@@ -5,6 +5,6 @@ dist/
 .env
 .env.*
 !.env.example
-# Proving keys are large (80 MB); regenerate with `npm run compile`.
-contract/managed/priveil/keys/
+# Proving keys (contract/managed/priveil/keys) ARE committed: the live mode
+# serves them to the wallet for proving, and Vercel has no Compact compiler.
 ui/public/managed/
