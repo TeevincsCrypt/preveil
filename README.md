@@ -2,6 +2,8 @@
 
 **Fund builders. Protect voters.**
 
+[![CI](https://github.com/TeevincsCrypt/preveil/actions/workflows/ci.yml/badge.svg)](https://github.com/TeevincsCrypt/preveil/actions/workflows/ci.yml) ![Compact 0.28](https://img.shields.io/badge/Compact-0.28-a594f9) ![compactc 0.36.1](https://img.shields.io/badge/compactc-0.36.1-5fd4c4) ![License Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-lightgrey)
+
 PRIVEIL is a privacy-preserving grant allocation protocol built on [Midnight](https://midnight.network).
 Communities, DAOs and ecosystem grant programs use it to allocate funding to builders **without
 publicly exposing how each member voted**, while the final allocation stays **publicly verifiable**.
