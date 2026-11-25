@@ -227,9 +227,10 @@ npm run build && npm run preview    # http://localhost:4173
 
 ### Deploy the web app (Vercel)
 
-Import the repository in Vercel with the default settings. `vercel.json` sets the install command
-(`npm install`), the build command (`npm run build`) and the output directory (`ui/dist`). The app
-uses hash routing, so it needs no rewrites. The build uses the committed generated contract code, so
+Import the repository in Vercel with the default settings. The build writes the site to both
+`ui/dist` and `dist` (repo root), so it is found whether the Vercel project's Root Directory is the
+repository or `ui/`. `vercel.json` sets `npm install`, `npm run build` and `dist`. The app uses hash
+routing, so it needs no rewrites. The build uses the committed generated contract code, so
 Vercel does not need the Compact compiler.
 
 ### Compile the contract

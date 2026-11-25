@@ -7,7 +7,7 @@
   "scripts": {
     "copy:zk": "node scripts/copy-zk.mjs",
     "dev": "npm run copy:zk && vite",
-    "build": "npm run copy:zk && tsc -b && vite build",
+    "build": "npm run copy:zk && tsc -b && vite build && node scripts/publish-dist.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b"
   },
