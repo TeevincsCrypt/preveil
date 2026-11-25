@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  contract-and-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Compact compiler 0.36.1
+        uses: midnightntwrk/setup-compact-action@836895c8fffbbea6bd986af2b17e8941ff29d1f8
+        with:
+          compact-version: '0.36.1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compile the Compact contract (with ZK proving keys)
+        run: npm run compile
+
+      - name: Committed generated contract code matches a fresh compile
+        run: git diff --exit-code -- contract/managed/priveil/contract contract/managed/priveil/compiler
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Contract tests (compiled contract on compact-runtime)
+        run: npm test
+
+      - name: Build web app
+        run: npm run build
+
+      - name: End-to-end demo flow (Playwright)
+        run: |
+          npm i --no-save playwright@1.63.0
+          npx playwright install --with-deps chromium
+          (cd ui && npx vite preview --port 4173 --strictPort &) 
+          npx wait-on -t 60000 http://localhost:4173 || sleep 5
+          node ui/e2e/demo-flow.cjs http://localhost:4173
