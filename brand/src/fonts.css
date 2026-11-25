@@ -1,0 +1,5 @@
+@font-face { font-family: "Unbounded"; src: url("../../node_modules/@fontsource-variable/unbounded/files/unbounded-latin-wght-normal.woff2") format("woff2"); font-weight: 200 900; }
+@font-face { font-family: "Outfit"; src: url("../../node_modules/@fontsource-variable/outfit/files/outfit-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+@font-face { font-family: "Geist Mono"; src: url("../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { -webkit-font-smoothing: antialiased; }

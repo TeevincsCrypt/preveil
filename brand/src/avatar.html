@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="fonts.css">
+<style>
+  html, body { width: 400px; height: 400px; }
+  .c { width: 400px; height: 400px; display: flex; align-items: center; justify-content: center;
+       background: radial-gradient(300px 280px at 12% 92%, rgb(240 128 64 / .95), rgb(240 138 75 / .45) 42%, transparent 72%), #dfe0dc; }
+  .dark { background: radial-gradient(300px 280px at 12% 92%, rgb(240 128 64 / .85), rgb(240 138 75 / .28) 42%, transparent 72%), #141414; }
+  svg { width: 216px; height: 216px; transform: translateY(-4px); }
+</style></head><body>
+<div class="c" id="frame">
+  <svg viewBox="0 0 32 32"><path d="M4 9 16 3l12 6-12 6z" fill="var(--ink)"/><path d="M4 15.5 16 21.5l12-6" fill="none" stroke="#f08a4b" stroke-width="2.6" stroke-linejoin="round"/><path d="M4 22 16 28l12-6" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linejoin="round"/></svg>
+</div>
+<script>
+  const dark = location.hash === '#dark';
+  document.getElementById('frame').classList.toggle('dark', dark);
+  document.documentElement.style.setProperty('--ink', dark ? '#ecebe6' : '#111111');
+</script>
+</body></html>

@@ -1,0 +1,75 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="fonts.css">
+<style>
+  html, body { width: 1500px; height: 500px; overflow: hidden; }
+  .bg { position: relative; width: 1500px; height: 500px; overflow: hidden; font-family: Outfit, sans-serif; color: #111;
+        background: radial-gradient(760px 560px at -6% 0%, rgb(240 128 64 / .95), rgb(240 138 75 / .55) 32%, rgb(240 160 110 / .18) 58%, transparent 75%), #dfe0dc; }
+  .topline { position: absolute; left: 0; right: 0; top: 64px; height: 1px; background: rgb(17 17 17 / .7); }
+  .vline { position: absolute; left: 330px; top: 0; width: 1px; height: 64px; background: rgb(17 17 17 / .7); }
+  .word { position: absolute; left: 64px; top: 0; height: 64px; display: flex; align-items: center; gap: 12px; }
+  .word span { font-family: Unbounded; font-weight: 380; font-size: 27px; letter-spacing: -.035em; }
+  .nav { position: absolute; right: 64px; top: 0; height: 64px; display: flex; align-items: center; gap: 10px; font-size: 15px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #f08a4b; display: inline-block; }
+  .copy { position: absolute; left: 400px; top: 112px; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  h1 { margin-top: 26px; font-family: Unbounded; font-weight: 380; font-size: 62px; line-height: 1.04; letter-spacing: -.035em; }
+  .sub { margin-top: 22px; max-width: 400px; font-size: 18px; line-height: 1.45; color: rgb(17 17 17 / .72); }
+  .step { position: absolute; left: 0; bottom: 18px; width: 1500px; height: 46px; }
+  .device { position: absolute; right: 64px; top: 96px; width: 270px; border-radius: 10px; overflow: hidden; box-shadow: 0 30px 60px -24px rgb(17 17 17 / .45); }
+  .grad { height: 178px; padding: 16px;
+          background: radial-gradient(220px 180px at 105% -10%, #10292b 0%, #1c3d3e 22%, transparent 55%),
+                      radial-gradient(240px 210px at 80% 60%, rgb(240 128 64 / .95), rgb(240 138 75 / .4) 45%, transparent 70%),
+                      linear-gradient(180deg, #cfd1cf, #d9d6cf); }
+  .head { display: flex; gap: 10px; align-items: center; font-size: 12px; font-weight: 500; }
+  .av { width: 30px; height: 30px; border-radius: 50%; background: rgb(244 244 240 / .9); display: flex; align-items: center; justify-content: center; font-family: Unbounded; font-size: 9px; }
+  .mono { font-family: 'Geist Mono'; font-size: 10px; color: rgb(17 17 17 / .65); font-weight: 400; }
+  .big { margin-top: 44px; font-family: Unbounded; font-weight: 380; font-size: 34px; letter-spacing: -.035em; line-height: 1; }
+  .meta { margin-top: 8px; font-size: 11px; font-weight: 500; }
+  .ink { background: #141414; color: #ecebe6; padding: 14px 16px; }
+  .row { display: flex; align-items: center; justify-content: space-between; }
+  .row b { font-family: Unbounded; font-weight: 380; font-size: 14px; letter-spacing: -.03em; }
+  .row small { display: block; margin-top: 4px; font-size: 10px; color: rgb(236 235 230 / .55); }
+  .ballot { position: absolute; right: 236px; top: 312px; width: 236px; border-radius: 8px; background: #1d1d1d; color: #ecebe6; padding: 13px 14px; box-shadow: 0 24px 50px -18px rgb(0 0 0 / .6); }
+  .ballot .t { font-family: Unbounded; font-weight: 380; font-size: 13px; color: rgb(236 235 230 / .6); letter-spacing: -.03em; }
+  .kv { margin-top: 9px; display: flex; justify-content: space-between; font-size: 10px; color: rgb(236 235 230 / .55); }
+  .hr { margin-top: 6px; height: 1px; background: rgb(236 235 230 / .3); }
+  .chips { margin-top: 11px; display: flex; gap: 5px; align-items: center; }
+  .chip { width: 21px; height: 21px; border-radius: 3px; background: rgb(236 235 230 / .12); font-family: 'Geist Mono'; font-size: 9px; display: flex; align-items: center; justify-content: center; color: rgb(236 235 230 / .7); }
+  .chip.on { background: #f08a4b; color: #141414; }
+  .btn { margin-left: auto; background: #ecebe6; color: #141414; border-radius: 3px; padding: 5px 9px; font-size: 10px; font-weight: 500; }
+</style></head><body>
+<div class="bg">
+  <div class="topline"></div><div class="vline"></div>
+  <div class="word">
+    <svg width="30" height="30" viewBox="0 0 32 32"><path d="M4 9 16 3l12 6-12 6z" fill="#111"/><path d="M4 15.5 16 21.5l12-6" fill="none" stroke="#f08a4b" stroke-width="2.6" stroke-linejoin="round"/><path d="M4 22 16 28l12-6" fill="none" stroke="#111" stroke-width="2.6" stroke-linejoin="round"/></svg>
+    <span>priveil</span>
+  </div>
+  <div class="nav"><span class="dot"></span> Built on Midnight</div>
+
+  <div class="copy">
+    <div class="eyebrow"><span class="dot"></span> Private votes · public outcomes</div>
+    <h1>Fund builders.<br>Protect voters.</h1>
+    <div class="sub">Privacy-preserving grant allocation, enforced by zero-knowledge proofs.</div>
+  </div>
+
+  <div class="device">
+    <div class="grad">
+      <div class="head"><div class="av">PB</div><div>Privacy Builders Fund<div class="mono">0x7a3f…c91e</div></div></div>
+      <div class="big">$100,000</div>
+      <div class="meta">↗ 14 of 24 sealed ballots</div>
+    </div>
+    <div class="ink">
+      <div class="row"><div><b>Cast a hidden ballot</b><small>Eligible, unlinkable, one per member</small></div><span>→</span></div>
+    </div>
+  </div>
+
+  <div class="ballot">
+    <div class="row"><span class="t">Sealed ballot</span><span class="mono" style="color:rgb(236 235 230 / .7)">ZK</span></div>
+    <div class="kv"><span>commitment</span><span class="mono" style="color:rgb(236 235 230 / .75)">0x9c04…7b12</span></div>
+    <div class="hr"></div>
+    <div class="kv" style="margin-top:6px"><span>your choice</span><span>hidden until close</span></div>
+    <div class="chips"><span class="chip">#0</span><span class="chip">#1</span><span class="chip on">#2</span><span class="chip">#3</span><span class="btn">Cast ballot</span></div>
+  </div>
+
+  <svg class="step" viewBox="0 0 1500 46" preserveAspectRatio="none"><path d="M0 40 H520 L548 8 H930 L958 40 H1500" fill="none" stroke="#111" stroke-width="1"/></svg>
+</div>
+</body></html>
