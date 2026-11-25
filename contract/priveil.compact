@@ -1,0 +1,340 @@
+// PRIVEIL — privacy-preserving grant allocation on Midnight.
+// Copyright (C) 2026 PRIVEIL contributors
+// SPDX-License-Identifier: Apache-2.0
+//
+// One deployment of this contract is one grant round.
+//
+//   Timeline (block time, Unix seconds):
+//
+//   deploy ──► submissionEnd ──► votingStart ──► votingEnd ──► revealEnd ──► finalize
+//   │ builders submit proposals │              │ hidden     │ ballots     │ anyone submits the
+//   │ admin enrols voters ──────────────────── │ ballots    │ opened and  │ canonical ranking; the
+//   │                                          │ cast       │ tallied     │ contract checks it and
+//   │                                          │            │             │ computes allocations
+//
+// What is private (never written to the public ledger):
+//   * every participant's secret key (witness `secretKey`)
+//   * which enrolled voter cast which ballot (Merkle membership proof, the leaf
+//     is never disclosed; the nullifier is a one-way hash of the secret key)
+//   * each ballot's choice while voting is open (only a hiding, salted
+//     commitment is stored), so there is no running tally to follow
+//   * the ballot salt
+//
+// What is public (and why) is listed next to each ledger field below and in
+// SPEC.md, together with the accepted leaks.
+
+pragma language_version 0.28;
+import CompactStandardLibrary;
+
+// ─── Public ledger: round configuration (fixed at deployment) ───────────────
+
+// Hash of the admin's secret key. Admin circuits compare against it.
+export sealed ledger adminPk: Bytes<32>;
+// Commitment to the round's off-chain metadata (name, description, rules).
+// Nullifiers and salts are bound to it so ballots in different rounds can't
+// be linked.
+export sealed ledger roundId: Bytes<32>;
+// Total funding available in this round, in the round's accounting unit.
+export sealed ledger fundingPool: Uint<64>;
+// Builders may submit proposals while blockTime < submissionEnd.
+export sealed ledger submissionEnd: Uint<64>;
+// Ballots may be cast while votingStart <= blockTime < votingEnd.
+export sealed ledger votingStart: Uint<64>;
+export sealed ledger votingEnd: Uint<64>;
+// Ballots may be opened while votingEnd <= blockTime < revealEnd.
+export sealed ledger revealEnd: Uint<64>;
+// Minimum number of votes a proposal needs to be eligible for funding.
+export sealed ledger quorum: Uint<64>;
+
+// ─── Public ledger: proposals ───────────────────────────────────────────────
+
+export struct Proposal {
+  // Hash of the proposal document (name, description, links, justification).
+  // The document itself is published off chain; anyone can check it hashes
+  // to this value.
+  metadataHash: Bytes<32>,
+  // Funding requested, in the round's accounting unit.
+  requested: Uint<64>,
+  // Pseudonymous builder key, derived from the builder's secret. Lets the
+  // builder later prove they own the proposal (e.g. for a payout claim).
+  builderPk: Bytes<32>
+}
+
+// Proposals are numbered 0..proposalCount-1 in submission order.
+export ledger proposals: Map<Uint<8>, Proposal>;
+export ledger proposalHashes: Set<Bytes<32>>;
+export ledger proposalCount: Uint<8>;
+
+// ─── Public ledger: eligibility ─────────────────────────────────────────────
+
+// Enrolled voter keys. Each key is hash(voter secret). Casting a ballot proves
+// membership against the root of this tree without saying which leaf.
+export ledger voters: MerkleTree<10, Bytes<32>>;
+// Rejects enrolling the same key twice.
+export ledger voterKeys: Set<Bytes<32>>;
+export ledger enrolled: Counter;
+
+// ─── Public ledger: ballots ─────────────────────────────────────────────────
+
+// nullifier -> persistentCommit(choice, salt). The nullifier stops a voter
+// casting twice; the commitment hides the choice until it is opened.
+export ledger ballots: Map<Bytes<32>, Bytes<32>>;
+export ledger ballotsCast: Counter;
+// Nullifiers whose ballot has been opened and counted.
+export ledger revealed: Set<Bytes<32>>;
+export ledger ballotsRevealed: Counter;
+// proposal index -> votes counted for it. Only grows during the reveal phase.
+export ledger tallies: Map<Uint<8>, Uint<64>>;
+
+// ─── Public ledger: outcome ─────────────────────────────────────────────────
+
+export ledger finalized: Boolean;
+// The verified ranking (proposal indices, most votes first). Entries at
+// positions >= proposalCount are padding and carry no meaning.
+export ledger ranking: Vector<8, Uint<8>>;
+// proposal index -> amount allocated (0 if not funded).
+export ledger allocations: Map<Uint<8>, Uint<64>>;
+export ledger totalAllocated: Uint<64>;
+// Budget still unallocated; used as the running total while finalizing.
+export ledger remainingBudget: Uint<64>;
+
+// ─── Witnesses (run off chain, on the participant's device) ─────────────────
+
+// The caller's secret key, from their private state. Never leaves the device.
+witness secretKey(): Bytes<32>;
+// The Merkle path from the caller's voter key to the root of `voters`.
+witness voterPath(pk: Bytes<32>): MerkleTreePath<10, Bytes<32>>;
+// The proposal index the voter is choosing, from their private state.
+witness ballotChoice(): Uint<8>;
+
+// ─── Constructor: create the grant round ────────────────────────────────────
+
+constructor(
+  rid: Bytes<32>,
+  pool: Uint<64>,
+  subEnd: Uint<64>,
+  voteStart: Uint<64>,
+  voteEnd: Uint<64>,
+  revEnd: Uint<64>,
+  minVotes: Uint<64>
+) {
+  const r = disclose(rid);
+  const p = disclose(pool);
+  const se = disclose(subEnd);
+  const vs = disclose(voteStart);
+  const ve = disclose(voteEnd);
+  const re = disclose(revEnd);
+  const q = disclose(minVotes);
+  assert(r != default<Bytes<32>>, "Round id must be set");
+  assert(p > 0, "Funding pool must be positive");
+  assert(se <= vs, "Submissions must close before voting opens");
+  assert(vs < ve, "Voting must open before it closes");
+  assert(ve < re, "Reveal window must end after voting closes");
+  assert(re < 1000000000000, "Timestamp out of range");
+  assert(q > 0, "Quorum must be at least one vote");
+
+  adminPk = disclose(adminKey(secretKey()));
+  roundId = r;
+  fundingPool = p;
+  submissionEnd = se;
+  votingStart = vs;
+  votingEnd = ve;
+  revealEnd = re;
+  quorum = q;
+  proposalCount = 0;
+  finalized = false;
+  remainingBudget = p;
+  totalAllocated = 0;
+}
+
+// ─── Key derivation (domain-separated hashes of a participant's secret) ─────
+
+export pure circuit adminKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "priveil:admin"), sk]);
+}
+
+export pure circuit voterKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "priveil:voter"), sk]);
+}
+
+export pure circuit builderKey(sk: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<2, Bytes<32>>>([pad(32, "priveil:builder"), sk]);
+}
+
+// One nullifier per (voter, round, contract instance). Without `sk` it can't
+// be linked to the voter's enrolled key, and it differs across rounds.
+export pure circuit ballotNullifier(sk: Bytes<32>, rid: Bytes<32>, instance: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<4, Bytes<32>>>([pad(32, "priveil:nullifier"), sk, rid, instance]);
+}
+
+// The secret blinding factor for the ballot commitment. A commitment to a
+// small value (a proposal index) without a secret salt could be brute-forced.
+export pure circuit ballotSalt(sk: Bytes<32>, rid: Bytes<32>, instance: Bytes<32>): Bytes<32> {
+  return persistentHash<Vector<4, Bytes<32>>>([pad(32, "priveil:salt"), sk, rid, instance]);
+}
+
+export pure circuit ballotCommitment(choice: Uint<8>, salt: Bytes<32>): Bytes<32> {
+  return persistentCommit<Uint<8>>(choice, salt);
+}
+
+circuit requireAdmin(): [] {
+  assert(disclose(adminKey(secretKey())) == adminPk, "Only the round admin can do this");
+}
+
+// ─── Builders: submit a proposal ────────────────────────────────────────────
+
+export circuit submitProposal(metadataHash: Bytes<32>, requested: Uint<64>): Uint<8> {
+  assert(blockTimeLt(submissionEnd), "Proposal submissions are closed");
+  const h = disclose(metadataHash);
+  const amt = disclose(requested);
+  assert(h != default<Bytes<32>>, "Proposal metadata hash must be set");
+  assert(!proposalHashes.member(h), "Proposal already submitted");
+  assert(amt > 0, "Requested amount must be positive");
+  assert(amt <= fundingPool, "Requested amount exceeds the funding pool");
+  assert(proposalCount < 8, "Round is full (8 proposals max)");
+
+  const id = proposalCount;
+  proposals.insert(id, Proposal {
+    metadataHash: h,
+    requested: amt,
+    builderPk: disclose(builderKey(secretKey()))
+  });
+  proposalHashes.insert(h);
+  tallies.insert(id, 0);
+  allocations.insert(id, 0);
+  proposalCount = (id + 1) as Uint<8>;
+  return id;
+}
+
+// ─── Admin: enrol eligible voters ───────────────────────────────────────────
+
+// The voter generates their secret locally and gives the admin only
+// voterKey(secret). Enrolment closes when voting opens, which freezes the
+// anonymity set.
+export circuit enrolVoter(pk: Bytes<32>): [] {
+  requireAdmin();
+  assert(blockTimeLt(votingStart), "Enrolment closed when voting opened");
+  const k = disclose(pk);
+  assert(k != default<Bytes<32>>, "Voter key must be set");
+  assert(!voterKeys.member(k), "Voter already enrolled");
+  assert(enrolled.read() < 1024, "Voter list is full");
+  voterKeys.insert(k);
+  voters.insert(k);
+  enrolled.increment(1);
+}
+
+// ─── Voters: cast a hidden ballot ───────────────────────────────────────────
+
+// Proves, in zero knowledge:
+//   1. the caller knows a secret whose voter key is a leaf of `voters`
+//      (without revealing which leaf),
+//   2. the nullifier was derived correctly from that same secret,
+//   3. the hidden choice is a valid proposal index,
+//   4. the stored commitment opens to that choice.
+// Publishes only: the nullifier and the commitment.
+export circuit castBallot(): [] {
+  assert(blockTimeGte(votingStart), "Voting has not opened yet");
+  assert(blockTimeLt(votingEnd), "Voting has closed");
+  assert(proposalCount > 0, "No proposals to vote on");
+
+  const sk = secretKey();
+  const pk = voterKey(sk);
+  const path = voterPath(pk);
+  assert(disclose(path.leaf == pk), "Merkle path is not for this voter");
+  assert(voters.checkRoot(disclose(merkleTreePathRoot<10, Bytes<32>>(path))), "Not an eligible voter");
+
+  const instance = kernel.self().bytes;
+  const n = disclose(ballotNullifier(sk, roundId, instance));
+  assert(!ballots.member(n), "Already voted in this round");
+
+  const choice = ballotChoice();
+  // Only the fact that the choice is valid is disclosed, not the choice.
+  assert(disclose(choice < proposalCount), "Ballot is not for a valid proposal");
+
+  ballots.insert(n, ballotCommitment(choice, ballotSalt(sk, roundId, instance)));
+  ballotsCast.increment(1);
+}
+
+// ─── Reveal: open a ballot and add it to the tally ──────────────────────────
+
+// Anyone holding a ballot's opening (nullifier, choice, salt) can submit it:
+// normally the voter's own client, or a tally agent the voter handed the
+// opening to. The salt is checked in-circuit and is not published. The
+// opened choice becomes public under the nullifier, which is still not
+// linked to any enrolled voter.
+export circuit revealBallot(nullifier: Bytes<32>, choice: Uint<8>, salt: Bytes<32>): [] {
+  assert(blockTimeGte(votingEnd), "Voting is still open");
+  assert(blockTimeLt(revealEnd), "Reveal window has ended");
+  const n = disclose(nullifier);
+  const c = disclose(choice);
+  assert(ballots.member(n), "No such ballot");
+  assert(!revealed.member(n), "Ballot already counted");
+  assert(ballots.lookup(n) == ballotCommitment(c, salt), "Opening does not match the ballot");
+  assert(c < proposalCount, "Ballot is not for a valid proposal");
+
+  revealed.insert(n);
+  ballotsRevealed.increment(1);
+  tallies.insert(c, (tallies.lookup(c) + 1) as Uint<64>);
+}
+
+// ─── Finalize: verify the ranking and compute allocations ───────────────────
+
+// `order` is the claimed ranking: proposal indices sorted by votes (most
+// first), ties broken by the lower index (the earlier submission). Because
+// that ordering is a strict total order, exactly one ranking passes, so the
+// caller has no choice to make. Anyone can submit it.
+//
+// Allocation rule ("ranked greedy with quorum"): walk the ranking from the
+// top; a proposal that reached the quorum and whose full request fits in the
+// remaining budget receives its full request; otherwise it receives nothing
+// and the walk continues with the next proposal.
+export circuit finalize(order: Vector<8, Uint<8>>): [] {
+  assert(!finalized, "Round already finalized");
+  assert(blockTimeGte(votingEnd), "Voting is still open");
+  // Finalize after the reveal window, or as soon as every cast ballot has
+  // been opened (nothing could change the tally after that).
+  if (ballotsRevealed.read() != ballotsCast.read()) {
+    assert(blockTimeGte(revealEnd), "Reveal window is still open");
+  }
+
+  const o = disclose(order);
+  const count = proposalCount;
+
+  // 1. Every ranked position holds a real proposal.
+  for (const i of 0..8) {
+    if (i < count) {
+      assert(o[i] < count, "Ranking names a proposal that does not exist");
+    }
+  }
+  // 2. No proposal appears twice (so the ranking is a permutation).
+  for (const i of 0..8) {
+    for (const j of 0..8) {
+      if (i < j && j < count) {
+        assert(o[i] != o[j], "Ranking lists a proposal twice");
+      }
+    }
+  }
+  // 3. Sorted by votes descending, ties by lower index first.
+  for (const i of 0..7) {
+    if (i + 1 < count) {
+      const a = tallies.lookup(o[i]);
+      const b = tallies.lookup(o[i + 1]);
+      assert(a > b || (a == b && o[i] < o[i + 1]), "Ranking is not sorted by votes");
+    }
+  }
+  // 4. Ranked greedy allocation within the funding pool.
+  for (const i of 0..8) {
+    if (i < count) {
+      const id = o[i];
+      const req = proposals.lookup(id).requested;
+      if (tallies.lookup(id) >= quorum && req <= remainingBudget) {
+        allocations.insert(id, req);
+        remainingBudget = (remainingBudget - req) as Uint<64>;
+        totalAllocated = (totalAllocated + req) as Uint<64>;
+      }
+    }
+  }
+
+  ranking = o;
+  finalized = true;
+}

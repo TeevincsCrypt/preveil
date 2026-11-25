@@ -1,0 +1,139 @@
+{
+  "manifest-version": "1",
+  "compiler-version": "0.36.1",
+  "compiler-commit": "7fa3a117c5e7efe9d2c51da04263e5f0b3509144",
+  "language-version": "0.28.0",
+  "runtime-version": "0.21.0",
+  "compiler": {
+    "type": "directory",
+    "contract-info.json": {
+      "type": "file",
+      "size": 12788,
+      "hash": "57c637ff41134bdea800e58312c657f4f6907c5a5b0cff1ec9926c68a5b0c604"
+    }
+  },
+  "contract": {
+    "type": "directory",
+    "index.d.ts": {
+      "type": "file",
+      "size": 7810,
+      "hash": "d95680543afe3a49e638c8d97c55167e6c33060f57a431e2933cdcce7770f997"
+    },
+    "index.js": {
+      "type": "file",
+      "size": 328155,
+      "hash": "1b07d4d8157cf874aa28f677648b53ca7dd8bd060a86d7b345ec39a346640152"
+    },
+    "index.js.map": {
+      "type": "file",
+      "size": 9746,
+      "hash": "bbee0537d4f5b8cdedc26ddff27ebc7c334fef4a6e3b7770a3000f43b56b4702"
+    }
+  },
+  "zkir": {
+    "type": "directory",
+    "castBallot.bzkir": {
+      "type": "file",
+      "size": 4441,
+      "hash": "ef1bef2eb51c0c577f833c06e07063c29b2783bd4b253c2b9be6e986e7276620"
+    },
+    "castBallot.zkir": {
+      "type": "file",
+      "size": 15297,
+      "hash": "57b07e5516894635ec89c51d65a339f38c1b458ebac304178ceae823b6ca5204"
+    },
+    "enrolVoter.bzkir": {
+      "type": "file",
+      "size": 1666,
+      "hash": "f6fbb851f265cc0ee2bd6d3781a6fa5d9687fe879f07128be48c181d771cffc1"
+    },
+    "enrolVoter.zkir": {
+      "type": "file",
+      "size": 5878,
+      "hash": "77d4763836fc4450c5fe37524c4242d0b42f85acfaf9671635f488b13aa5d7b6"
+    },
+    "finalize.bzkir": {
+      "type": "file",
+      "size": 24917,
+      "hash": "cd6b1810a60dfb97247640d6368ff9bb77485d52e53db849f9c4660ff42f86c7"
+    },
+    "finalize.zkir": {
+      "type": "file",
+      "size": 76780,
+      "hash": "651954b65dce07e0c9811f059b7b68895edf182a039108ed87cd48a377aecddd"
+    },
+    "revealBallot.bzkir": {
+      "type": "file",
+      "size": 2161,
+      "hash": "bfe51265ec0ecf02533b7236fc7c6496d42d6f8fb7af2416ae78721731b05255"
+    },
+    "revealBallot.zkir": {
+      "type": "file",
+      "size": 7170,
+      "hash": "ffce0762c60c55623aeb91bf602dddfca4299248332c737d348e7d16ca958f02"
+    },
+    "submitProposal.bzkir": {
+      "type": "file",
+      "size": 2214,
+      "hash": "a9f77098be773db8b00a57e321c6af690116748a3ce0e6cd01779e4c7acd0f97"
+    },
+    "submitProposal.zkir": {
+      "type": "file",
+      "size": 7065,
+      "hash": "83fc021d88ed1bfb07f9bcb12a56ac1696e962fccbcbfa4499473d0fd6b4ec40"
+    }
+  },
+  "keys": {
+    "type": "directory",
+    "castBallot.prover": {
+      "type": "file",
+      "size": 45097577,
+      "hash": "23694c8726c038720c37fc54457829b7fbb7522cdc35636ab3867708a346413e"
+    },
+    "castBallot.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "580b8a28d6ea425c5a7caf8b10215a72349e9254c99da262eabcc061daf37348"
+    },
+    "enrolVoter.prover": {
+      "type": "file",
+      "size": 11278226,
+      "hash": "fee5d550994f9d46e7285123c75b17763e6d2339eb4139f2905e2703d284d8ca"
+    },
+    "enrolVoter.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "a81239eee8b1237d32ad99c54bf16291eda7877a1cea20b23856b01dcce207b0"
+    },
+    "finalize.prover": {
+      "type": "file",
+      "size": 3566631,
+      "hash": "bc71561c89278ff8d486dca0d3f74d86f37b3922d162840e13c89fd0467ee0cc"
+    },
+    "finalize.verifier": {
+      "type": "file",
+      "size": 1353,
+      "hash": "5615407f71bb1ac0dab0acda83957b659ef1c107d9a366b7f075aa6643df5ff6"
+    },
+    "revealBallot.prover": {
+      "type": "file",
+      "size": 11278721,
+      "hash": "01e3c1d4bc05f2950ddbbc6a11b37b18faf1e9f7c5458c5b65884ffad338d4e5"
+    },
+    "revealBallot.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "ec08614d8bc881a4c7c761e5c5db3f775870f8013ad2d770c029e21310012caa"
+    },
+    "submitProposal.prover": {
+      "type": "file",
+      "size": 11278774,
+      "hash": "b24578180acb9b988c9a12590b409fe5888eb4f12d3dea019363bb4a4f0c35c7"
+    },
+    "submitProposal.verifier": {
+      "type": "file",
+      "size": 2121,
+      "hash": "079dc25e8795a3c4203454ae846af6b4aaf0a4c98137d56af4419780c8c812e8"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "priveil",
+  "version": "0.1.0",
+  "description": "PRIVEIL: privacy-preserving grant allocation on Midnight",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "workspaces": [
+    "ui"
+  ],
+  "scripts": {
+    "compile": "compact compile contract/priveil.compact contract/managed/priveil",
+    "compile:fast": "compact compile --skip-zk contract/priveil.compact contract/managed/priveil",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run",
+    "test:sim": "vitest run",
+    "dev": "npm run dev -w ui",
+    "build": "npm run build -w ui"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "0.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}
