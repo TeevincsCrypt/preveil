@@ -18,7 +18,9 @@
     "test": "vitest run",
     "test:sim": "vitest run",
     "dev": "npm run dev -w ui",
-    "build": "npm run build -w ui"
+    "build": "npm run build -w ui",
+    "e2e": "node ui/e2e/demo-flow.cjs",
+    "preview": "npm run preview -w ui -- --port 4173"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-runtime": "0.21.0"

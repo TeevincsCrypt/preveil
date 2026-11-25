@@ -7,4 +7,4 @@ dist/
 !.env.example
 # Proving keys are large (80 MB); regenerate with `npm run compile`.
 contract/managed/priveil/keys/
-ui/public/zk/
+ui/public/managed/
