@@ -8,8 +8,8 @@ export function Card({ children, className, tone }: { children: ReactNode; class
   return (
     <div
       className={cx(
-        'rounded-2xl border bg-surface',
-        tone === 'private' ? 'border-private/25' : tone === 'public' ? 'border-public/20' : 'border-line',
+        'rounded-lg border bg-raised',
+        tone === 'private' ? 'border-private/30' : tone === 'public' ? 'border-public/30' : 'border-line',
         className,
       )}
     >
@@ -24,22 +24,24 @@ export function Button({
   className,
   children,
   busy,
+  dot,
   ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; busy?: boolean }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; busy?: boolean; dot?: boolean }) {
   return (
     <button
       {...rest}
       disabled={rest.disabled || busy}
       className={cx(
-        'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-private',
-        variant === 'primary' && 'bg-fg text-bg hover:bg-white',
-        variant === 'secondary' && 'border border-line-strong bg-raised text-fg hover:border-white/25',
-        variant === 'ghost' && 'text-muted hover:bg-white/5 hover:text-fg',
-        variant === 'danger' && 'border border-bad/30 bg-bad/10 text-bad hover:bg-bad/15',
+        'inline-flex items-center justify-center gap-2 rounded-[3px] px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flame',
+        variant === 'primary' && 'bg-ink text-ink-fg hover:bg-black',
+        variant === 'secondary' && 'border border-line-strong bg-raised text-fg hover:border-fg/45',
+        variant === 'ghost' && 'text-muted hover:bg-fg/5 hover:text-fg',
+        variant === 'danger' && 'border border-bad/30 bg-bad/8 text-bad hover:bg-bad/12',
         className,
       )}
     >
       {busy && <span className="size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />}
+      {!busy && (dot ?? variant === 'primary') && <span className="size-1.5 shrink-0 rounded-full bg-flame" />}
       {children}
     </button>
   );
@@ -50,7 +52,7 @@ export function Badge({ children, tone = 'neutral', className }: { children: Rea
     <span
       className={cx(
         'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium',
-        tone === 'neutral' && 'bg-white/6 text-muted',
+        tone === 'neutral' && 'bg-fg/7 text-muted',
         tone === 'private' && 'bg-private-dim text-private',
         tone === 'public' && 'bg-public-dim text-public',
         tone === 'ok' && 'bg-ok/10 text-ok',
@@ -84,8 +86,8 @@ export function PublicTag({ className }: { className?: string }) {
 export function Stat({ label, value, sub, tone }: { label: string; value: ReactNode; sub?: ReactNode; tone?: 'private' | 'public' }) {
   return (
     <div className="min-w-0">
-      <div className="text-xs uppercase tracking-[0.14em] text-faint">{label}</div>
-      <div className={cx('mt-1.5 truncate text-xl font-medium tabular-nums tracking-tight sm:text-2xl', tone === 'private' && 'text-private', tone === 'public' && 'text-public')}>
+      <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-faint">{label}</div>
+      <div className={cx('font-display mt-2 truncate text-lg tabular-nums sm:text-xl', tone === 'private' && 'text-private', tone === 'public' && 'text-public')}>
         {value}
       </div>
       {sub && <div className="mt-1 text-xs text-muted">{sub}</div>}
@@ -135,13 +137,13 @@ export function Field({ label, hint, children, error }: { label: string; hint?: 
 }
 
 export const inputCls =
-  'w-full rounded-xl border border-line-strong bg-bg px-3.5 py-2.5 text-sm text-fg placeholder:text-faint focus:border-private/60 focus:outline-none';
+  'w-full rounded-[4px] border border-line-strong bg-raised px-3.5 py-2.5 text-sm text-fg placeholder:text-faint focus:border-fg/55 focus:outline-none';
 
 export function SectionHeader({ eyebrow, title, children }: { eyebrow?: string; title: ReactNode; children?: ReactNode }) {
   return (
     <div className="max-w-2xl">
-      {eyebrow && <div className="text-xs font-medium uppercase tracking-[0.18em] text-private">{eyebrow}</div>}
-      <h2 className="mt-3 font-display text-4xl leading-[1.05] tracking-tight text-fg sm:text-5xl">{title}</h2>
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h2 className="font-display mt-5 text-[28px] leading-[1.12] text-fg sm:text-[40px]">{title}</h2>
       {children && <p className="mt-4 text-base leading-relaxed text-muted">{children}</p>}
     </div>
   );
@@ -159,11 +161,20 @@ export function KV({ k, children, tone }: { k: string; children: ReactNode; tone
 export function Meter({ value, max, tone = 'public' }: { value: number; max: number; tone?: 'public' | 'private' | 'ok' }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/6">
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-fg/8">
       <div
-        className={cx('h-full rounded-full transition-[width] duration-500', tone === 'public' && 'bg-public', tone === 'private' && 'bg-private', tone === 'ok' && 'bg-ok')}
+        className={cx('h-full rounded-full transition-[width] duration-500', tone === 'public' && 'bg-public', tone === 'private' && 'bg-flame', tone === 'ok' && 'bg-ok')}
         style={{ width: `${pct}%` }}
       />
+    </div>
+  );
+}
+
+export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cx('inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-fg', className)}>
+      <span className="size-1.5 rounded-full bg-flame" />
+      {children}
     </div>
   );
 }

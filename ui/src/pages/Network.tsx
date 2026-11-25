@@ -36,8 +36,8 @@ export function Network() {
 
   return (
     <Page className="max-w-5xl">
-      <div className="text-xs font-medium uppercase tracking-[0.18em] text-private">Modes & wallet</div>
-      <h1 className="mt-3 font-display text-5xl tracking-tight">Where the contract runs</h1>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-fg">Modes & wallet</div>
+      <h1 className="mt-3 font-display text-[30px] leading-[1.1] sm:text-[40px]">Where the contract runs</h1>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">PRIVEIL is explicit about what is real. Both modes run the same compiled Compact contract; they differ in proving and in where state lives.</p>
 
       <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -122,7 +122,7 @@ export function Network() {
             </Button>
           </div>
           {result && (
-            <div className={cx('mt-4 flex items-start gap-2 rounded-xl px-4 py-3 font-mono text-xs', result.ok ? 'bg-ok/10 text-ok' : 'bg-bad/10 text-bad')}>
+            <div className={cx('mt-4 flex items-start gap-2 rounded-md px-4 py-3 font-mono text-xs', result.ok ? 'bg-ok/10 text-ok' : 'bg-bad/10 text-bad')}>
               {result.ok && <CheckCircle2 className="size-4 shrink-0" />} {result.text}
             </div>
           )}

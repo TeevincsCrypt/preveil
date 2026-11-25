@@ -17,7 +17,7 @@ export function PhaseTimeline({ r }: { r: RoundEntry }) {
     { label: 'Verified allocation', range: l.finalized ? 'finalized on chain' : 'anyone can finalize' },
   ];
   return (
-    <ol className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4">
+    <ol className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line md:grid-cols-4">
       {steps.map((s, i) => {
         const state = i < idx ? 'done' : i === Math.floor(idx) ? 'now' : 'next';
         return (
@@ -28,7 +28,7 @@ export function PhaseTimeline({ r }: { r: RoundEntry }) {
                   'size-2 rounded-full',
                   state === 'done' && 'bg-public',
                   state === 'now' && 'pulse-dot bg-private',
-                  state === 'next' && 'bg-white/15',
+                  state === 'next' && 'bg-fg/15',
                 )}
               />
               <span className={cx('text-sm font-medium', state === 'next' && 'text-muted')}>{s.label}</span>
@@ -71,12 +71,12 @@ export function SimControls({ r }: { r: RoundEntry }) {
       <p className="mt-2 text-xs leading-relaxed text-muted">
         On a real network time passes and other members act from their own devices. Here you drive both. Every action below is still a real contract call.
       </p>
-      <div className="mt-4 flex items-center gap-2 rounded-xl bg-bg px-3 py-2 text-xs">
+      <div className="mt-4 flex items-center gap-2 rounded-md bg-bg px-3 py-2 text-xs">
         <Clock className="size-3.5 text-faint" />
         <span className="text-muted">Block time</span>
         <span className="ml-auto font-mono">{date(r.sim.time)}</span>
       </div>
-      <div className="mt-2 flex items-center gap-2 rounded-xl bg-bg px-3 py-2 text-xs">
+      <div className="mt-2 flex items-center gap-2 rounded-md bg-bg px-3 py-2 text-xs">
         <Badge tone="neutral">{PHASE_LABEL[phase]}</Badge>
       </div>
       <div className="mt-4 flex flex-col gap-2">

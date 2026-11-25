@@ -28,10 +28,14 @@ function Gate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-void seedDemo().catch((e) => {
-  console.error(e);
-  store.toast(false, 'Demo seed failed', String(e));
-});
+// Seeding executes dozens of contract calls on the main thread; start it just
+// after first paint so the landing page's entrance animation isn't frozen.
+setTimeout(() => {
+  void seedDemo().catch((e) => {
+    console.error(e);
+    store.toast(false, 'Demo seed failed', String(e));
+  });
+}, 900);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

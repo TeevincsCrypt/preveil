@@ -98,9 +98,9 @@ export function ResultsPanel({ r }: { r: RoundEntry }) {
                       {String(x.votes)} vote{x.votes === 1n ? '' : 's'}
                     </span>
                   </div>
-                  <div className="mt-2 ml-8 h-2 overflow-hidden rounded-full bg-white/6">
+                  <div className="mt-2 ml-8 h-2 overflow-hidden rounded-full bg-fg/7">
                     <div
-                      className={cx('h-full rounded-full transition-[width] duration-700', finalized && x.status === 'funded' ? 'bg-public' : 'bg-white/25')}
+                      className={cx('h-full rounded-full transition-[width] duration-700', finalized && x.status === 'funded' ? 'bg-public' : 'bg-fg/25')}
                       style={{ width: `${(Number(x.votes) / Number(maxVotes)) * 100}%` }}
                     />
                   </div>

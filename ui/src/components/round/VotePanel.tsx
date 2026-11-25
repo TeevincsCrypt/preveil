@@ -100,11 +100,11 @@ export function VotePanel({ r }: { r: RoundEntry }) {
                   onClick={() => setSelected(i)}
                   disabled={busy === 'cast'}
                   className={cx(
-                    'flex items-center gap-4 rounded-xl border p-4 text-left transition-colors',
-                    selected === i ? 'border-private/60 bg-private-dim' : 'border-line hover:border-line-strong',
+                    'flex items-center gap-4 rounded-md border p-4 text-left transition-colors',
+                    selected === i ? 'border-fg/60 bg-private-dim' : 'border-line hover:border-line-strong',
                   )}
                 >
-                  <span className={cx('flex size-5 shrink-0 items-center justify-center rounded-full border', selected === i ? 'border-private bg-private text-bg' : 'border-line-strong')}>
+                  <span className={cx('flex size-5 shrink-0 items-center justify-center rounded-full border', selected === i ? 'border-ink bg-ink text-ink-fg' : 'border-line-strong')}>
                     {selected === i && <Check className="size-3" />}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -134,7 +134,7 @@ export function VotePanel({ r }: { r: RoundEntry }) {
                   ) : i === step ? (
                     <span className="mt-1 size-3 animate-spin rounded-full border-2 border-private border-t-transparent" />
                   ) : (
-                    <span className="mt-1.5 ml-1 size-1.5 rounded-full bg-white/20" />
+                    <span className="mt-1.5 ml-1 size-1.5 rounded-full bg-fg/20" />
                   )}
                   <span>
                     <span className={cx(i > step && 'text-muted')}>{s.t}</span>
@@ -166,7 +166,7 @@ export function VotePanel({ r }: { r: RoundEntry }) {
             <h3 className="text-lg font-medium">Your vote is private.</h3>
           </div>
           <p className="mt-2 text-sm text-muted">Your participation was accepted. Here is how to check it yourself:</p>
-          <div className="mt-4 divide-y divide-line rounded-xl border border-line px-4">
+          <div className="mt-4 divide-y divide-line rounded-md border border-line px-4">
             <KV k="Nullifier on ledger">{onLedger ? <span className="text-ok">✓ present</span> : '—'}</KV>
             <KV k="Stored commitment matches your opening">
               {onLedger && b.commitment && toHex(l.ballots.lookup(b.nullifier)) === toHex(b.commitment) ? <span className="text-ok">✓ match</span> : '—'}
@@ -234,7 +234,7 @@ function RejectionLog({ r }: { r: RoundEntry }) {
   return (
     <ul className="mt-4 space-y-2">
       {rej.map((t) => (
-        <li key={t.id} className="rise flex items-start gap-2 rounded-xl border border-bad/20 bg-bad/5 px-3 py-2.5 text-xs">
+        <li key={t.id} className="rise flex items-start gap-2 rounded-md border border-bad/20 bg-bad/5 px-3 py-2.5 text-xs">
           <XCircle className="mt-0.5 size-3.5 shrink-0 text-bad" />
           <span>
             <span className="font-mono text-fg">{t.circuit}</span> rejected: <span className="font-mono text-bad">“{t.error}”</span>

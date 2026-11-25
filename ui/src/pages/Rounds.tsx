@@ -84,11 +84,11 @@ export function Rounds() {
     <Page>
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
         <div>
-          <div className="text-xs font-medium uppercase tracking-[0.18em] text-private">Dashboard</div>
-          <h1 className="mt-3 font-display text-5xl tracking-tight">Grant rounds</h1>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-fg">Dashboard</div>
+          <h1 className="mt-3 font-display text-[30px] leading-[1.1] sm:text-[40px]">Grant rounds</h1>
           <p className="mt-3 max-w-xl text-sm text-muted">Every number below is read from the decoded public ledger of each round’s contract. The rounds themselves are fictional demo data.</p>
         </div>
-        <Link to="/rounds/new" className="inline-flex items-center gap-2 self-start rounded-xl bg-fg px-4 py-2.5 text-sm font-medium text-bg hover:bg-white sm:ml-auto sm:self-auto">
+        <Link to="/rounds/new" className="inline-flex items-center gap-2 self-start rounded-md bg-ink px-4 py-2.5 text-sm font-medium text-ink-fg hover:bg-black sm:ml-auto sm:self-auto">
           <Plus className="size-4" /> Create round
         </Link>
       </div>

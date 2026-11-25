@@ -82,8 +82,8 @@ export function CreateRound() {
 
   return (
     <Page className="max-w-3xl py-8 sm:py-10">
-      <div className="text-xs font-medium uppercase tracking-[0.18em] text-private">New round</div>
-      <h1 className="mt-3 font-display text-5xl tracking-tight">Create a grant round</h1>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-fg">New round</div>
+      <h1 className="mt-3 font-display text-[30px] leading-[1.1] sm:text-[40px]">Create a grant round</h1>
       <p className="mt-3 text-sm text-muted">
         Deploys a new instance of the PRIVEIL contract. Funding pool, deadlines and quorum become sealed ledger fields that no one — including you — can change later.
       </p>
@@ -117,13 +117,13 @@ export function CreateRound() {
               <input type="datetime-local" className={inputCls} value={f.revealEnd} onChange={set('revealEnd')} />
             </Field>
           </div>
-          <div className="rounded-xl border border-line bg-bg p-4 text-xs leading-relaxed text-muted">
+          <div className="rounded-md border border-line bg-bg p-4 text-xs leading-relaxed text-muted">
             <div className="font-medium text-fg">Voting methodology</div>
             One member, one vote. Ballots are hidden commitments until voting closes, then opened and tallied.
             <div className="mt-3 font-medium text-fg">Allocation rule</div>
             Ranked greedy with quorum: proposals ranked by votes; each that met the quorum and fits in the remaining pool is fully funded.
           </div>
-          {error && <div className="rounded-xl border border-bad/30 bg-bad/5 px-4 py-3 font-mono text-xs text-bad">Constructor rejected: {error}</div>}
+          {error && <div className="rounded-md border border-bad/30 bg-bad/5 px-4 py-3 font-mono text-xs text-bad">Constructor rejected: {error}</div>}
           <div className="flex items-center gap-3 border-t border-line pt-5">
             <Button type="submit" busy={busy}>
               Deploy round contract

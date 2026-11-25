@@ -100,7 +100,7 @@ export function Privacy() {
         </Card>
       </div>
 
-      <Link to="/rounds/privacy-builders-wave-3/vote" className="mt-14 inline-flex items-center gap-2 rounded-xl bg-fg px-5 py-3 text-sm font-medium text-bg hover:bg-white">
+      <Link to="/rounds/privacy-builders-wave-3/vote" className="mt-14 inline-flex items-center gap-2 rounded-md bg-ink px-5 py-3 text-sm font-medium text-ink-fg hover:bg-black">
         Try it in the open round <ArrowRight className="size-4" />
       </Link>
     </Page>

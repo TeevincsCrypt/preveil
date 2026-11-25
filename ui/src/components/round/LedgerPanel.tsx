@@ -65,7 +65,7 @@ export function LedgerPanel({ r }: { r: RoundEntry }) {
         </p>
         <ol className="mt-4 max-h-[42rem] space-y-2 overflow-auto pr-1">
           {r.txs.map((t) => (
-            <li key={t.id} className={cx('rounded-xl border px-3.5 py-3', t.ok ? 'border-line' : 'border-bad/20 bg-bad/5')}>
+            <li key={t.id} className={cx('rounded-md border px-3.5 py-3', t.ok ? 'border-line' : 'border-bad/20 bg-bad/5')}>
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 {t.ok ? <CheckCircle2 className="size-3.5 text-ok" /> : <XCircle className="size-3.5 text-bad" />}
                 <span className="font-mono text-fg">{t.circuit}</span>

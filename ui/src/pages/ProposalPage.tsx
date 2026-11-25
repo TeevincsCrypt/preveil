@@ -43,7 +43,7 @@ export function ProposalPage() {
             {yours && <Badge tone="private">Submitted by you</Badge>}
             {l.finalized && (l.allocations.lookup(BigInt(i)) > 0n ? <Badge tone="ok">Funded {fmt(l.allocations.lookup(BigInt(i)), r.meta.unit)}</Badge> : <Badge>Not funded</Badge>)}
           </div>
-          <h1 className="mt-4 font-display text-5xl tracking-tight">{doc.name}</h1>
+          <h1 className="mt-4 font-display text-[30px] leading-[1.1] sm:text-[40px]">{doc.name}</h1>
           <p className="mt-3 text-lg text-muted">{doc.tagline}</p>
           <div className="mt-10 space-y-8 text-[15px] leading-relaxed">
             <section>
@@ -62,7 +62,7 @@ export function ProposalPage() {
               {[doc.github && ['Repository', doc.github], doc.website && ['Website / demo', doc.website]].filter(Boolean).map((x) => {
                 const [label, href] = x as string[];
                 return (
-                  <a key={label} href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-xl border border-line-strong px-3.5 py-2 text-sm text-muted hover:text-fg">
+                  <a key={label} href={href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-line-strong px-3.5 py-2 text-sm text-muted hover:text-fg">
                     {label} <ExternalLink className="size-3.5" />
                   </a>
                 );
@@ -86,7 +86,7 @@ export function ProposalPage() {
               )}
             </div>
             {phase === 'voting' && (
-              <Link to={`/rounds/${r.id}/vote`} className="mt-4 block rounded-xl bg-fg px-4 py-2.5 text-center text-sm font-medium text-bg hover:bg-white">
+              <Link to={`/rounds/${r.id}/vote`} className="mt-4 block rounded-md bg-ink px-4 py-2.5 text-center text-sm font-medium text-ink-fg hover:bg-black">
                 Vote privately
               </Link>
             )}
@@ -105,14 +105,14 @@ export function ProposalPage() {
               </KV>
               <KV k="requested">{fmt(p.requested, r.meta.unit)}</KV>
             </div>
-            <div className="mt-4 flex items-start gap-2 rounded-xl bg-bg p-3 text-xs">
+            <div className="mt-4 flex items-start gap-2 rounded-md bg-bg p-3 text-xs">
               {hashOk ? <CheckCircle2 className="size-4 shrink-0 text-ok" /> : <XCircle className="size-4 shrink-0 text-faint" />}
               <span className="text-muted">
                 {hashOk === null ? 'Checking…' : hashOk ? 'This document hashes (SHA-256, canonical JSON) to the on-chain metadataHash — it hasn’t been edited since submission.' : 'Document does not match the on-chain hash.'}
               </span>
             </div>
             {yours && (
-              <div className="mt-3 rounded-xl bg-private-dim p-3 text-xs text-private">
+              <div className="mt-3 rounded-md bg-private-dim p-3 text-xs text-private">
                 builderPk = H(“priveil:builder”, your secret) — you can prove ownership later. ✓ {toHex(builderKey(yours)) === toHex(p.builderPk) ? 'matches' : 'mismatch'}
               </div>
             )}

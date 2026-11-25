@@ -47,7 +47,7 @@ export function SubmitProposal() {
       <Link to={`/rounds/${r.id}`} className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
         <ArrowLeft className="size-4" /> {r.meta.name}
       </Link>
-      <h1 className="mt-6 font-display text-5xl tracking-tight">Submit a proposal</h1>
+      <h1 className="mt-6 font-display text-[30px] leading-[1.1] sm:text-[40px]">Submit a proposal</h1>
       <p className="mt-3 text-sm text-muted">
         The document stays off chain; its SHA-256 hash, your funding request and a pseudonymous builder key go on chain. Pool: {fmt(l.fundingPool, r.meta.unit)}.{' '}
         {phaseOf(l, r.sim.time) !== 'submission' && <span className="text-warn">Submissions for this round are closed — the contract will reject it.</span>}

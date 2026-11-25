@@ -49,7 +49,7 @@ export function RoundPage() {
             {r.meta.origin === 'demo' ? <Badge>Demo data</Badge> : <Badge tone="private">Created by you</Badge>}
             <span className="text-xs text-muted">{deadline}</span>
           </div>
-          <h1 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">{r.meta.name}</h1>
+          <h1 className="mt-4 font-display text-[30px] leading-[1.1] sm:text-[40px]">{r.meta.name}</h1>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">{r.meta.description}</p>
           <p className="mt-2 text-xs text-faint">
             {r.meta.sponsor} · {r.meta.methodology}
@@ -152,7 +152,7 @@ function Overview({ r }: { r: RoundEntry }) {
           </span>
         )}
         {phase === 'submission' && (
-          <Link to={`/rounds/${r.id}/submit`} className="ml-auto inline-flex items-center gap-1.5 rounded-xl bg-fg px-3.5 py-2 text-sm font-medium text-bg hover:bg-white">
+          <Link to={`/rounds/${r.id}/submit`} className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-ink px-3.5 py-2 text-sm font-medium text-ink-fg hover:bg-black">
             <Plus className="size-4" /> Submit proposal
           </Link>
         )}
