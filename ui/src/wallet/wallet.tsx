@@ -14,6 +14,14 @@ import '@midnight-ntwrk/dapp-connector-api';
 export const NETWORK_IDS = ['preprod', 'preview', 'undeployed'] as const;
 export type NetworkId = (typeof NETWORK_IDS)[number];
 
+const errorMessage = (e: unknown) => {
+  if (e && typeof e === 'object' && 'reason' in e && typeof (e as { reason: unknown }).reason === 'string') return (e as { reason: string }).reason;
+  return e instanceof Error ? e.message : String(e);
+};
+
+/** True for the connector's rejection when the wallet is on a different network. */
+export const isNetworkMismatch = (e: unknown) => /network/i.test(`${errorMessage(e)} ${e instanceof Error ? e.message : ''}`);
+
 export type DetectedWallet = { key: string; name: string; api: InitialAPI };
 
 export function detectWallets(): DetectedWallet[] {
@@ -73,14 +81,34 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       return;
     }
     setState((s) => ({ ...s, status: 'connecting', error: null }));
-    try {
-      const api = await w.api.connect(requestedNetwork);
-      const config = await api.getConfiguration();
-      const { shieldedAddress } = await api.getShieldedAddresses();
-      setState({ status: 'connected', api, walletName: w.name, shieldedAddress, networkId: config.networkId, indexerUri: config.indexerUri, error: null });
-    } catch (e) {
-      setState({ ...DISCONNECTED, status: 'error', error: e instanceof Error ? e.message : String(e) });
+    // Lace rejects connect(id) when its own network differs ("Network ID
+    // mismatch"). Try the chosen test network first, then the others, and use
+    // whichever the wallet is on. Mainnet is never tried: Live mode is for
+    // test networks only.
+    const order = [requestedNetwork, ...NETWORK_IDS.filter((n) => n !== requestedNetwork)];
+    let lastError: unknown = null;
+    for (const net of order) {
+      try {
+        const api = await w.api.connect(net);
+        const config = await api.getConfiguration();
+        if (config.networkId === 'mainnet') throw new Error('Your wallet is on mainnet. PRIVEIL Live mode only runs on test networks: switch Lace to Preprod or Preview.');
+        const { shieldedAddress } = await api.getShieldedAddresses();
+        setRequestedNetwork(net);
+        setState({ status: 'connected', api, walletName: w.name, shieldedAddress, networkId: config.networkId, indexerUri: config.indexerUri, error: null });
+        return;
+      } catch (e) {
+        lastError = e;
+        if (!isNetworkMismatch(e)) break; // user rejected, or a real error: stop here
+      }
     }
+    const msg = errorMessage(lastError);
+    setState({
+      ...DISCONNECTED,
+      status: 'error',
+      error: isNetworkMismatch(lastError)
+        ? `Your wallet is on a network PRIVEIL doesn’t support (tried ${order.join(', ')}). In Lace, open Settings → Midnight network and choose Preprod or Preview, then connect again. (${msg})`
+        : msg,
+    });
   }, [requestedNetwork]);
 
   const disconnect = useCallback(() => setState(DISCONNECTED), []);
