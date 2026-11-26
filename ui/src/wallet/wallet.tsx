@@ -11,7 +11,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import type { ConnectedAPI, InitialAPI } from '@midnight-ntwrk/dapp-connector-api';
 import '@midnight-ntwrk/dapp-connector-api';
 
-export const NETWORK_IDS = ['preprod', 'preview', 'undeployed'] as const;
+export const NETWORK_IDS = ['preprod', 'preview', 'testnet', 'undeployed'] as const;
 export type NetworkId = (typeof NETWORK_IDS)[number];
 
 const errorMessage = (e: unknown) => {
