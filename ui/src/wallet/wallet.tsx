@@ -106,7 +106,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       ...DISCONNECTED,
       status: 'error',
       error: isNetworkMismatch(lastError)
-        ? `Your wallet is on a network PRIVEIL doesn’t support (tried ${order.join(', ')}). In Lace, open Settings → Midnight network and choose Preprod or Preview, then connect again. (${msg})`
+        ? `Your wallet is on a network PRIVEIL Live mode doesn’t use (tried ${order.join(', ')}); most likely mainnet. Switch Lace’s network to Preprod or Preview (the network setting in Lace’s settings, not the proof-generator panel), then connect again. (${msg})`
         : msg,
     });
   }, [requestedNetwork]);
